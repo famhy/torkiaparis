@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  order    Int       @default(0)
+  products Product[]
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  price        Float
+  imageUrl     String?
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isBestseller Boolean  @default(false)
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  nom           String
+  telephone     String?
+  adresse       String?
+  codePostal    String?
+  instructions  String?
+  deliveryType  String? // livraison | click_collect
+  paymentMethod String?
+  items         String // JSON array of { name, quantity, price, ... }
+  subtotal      Float
+  deliveryFee   Float    @default(0)
+  promoDiscount Float    @default(0)
+  total         Float
+  promoCode     String?
+  status        String   @default("pending") // pending, confirmed, delivered, cancelled
+  createdAt     DateTime @default(now())
+}

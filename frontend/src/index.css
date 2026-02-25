@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0E509D;
+  --color-secondary: #8B7244;
+  --color-bg: #F8F6F2;
+  --color-bg-card: #FFFEFB;
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --radius-card: 12px;
+  --shadow-soft: 0 4px 20px rgba(14, 80, 157, 0.08);
+  --shadow-card: 0 8px 32px rgba(14, 80, 157, 0.1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: #2c2c2c;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Tunisian geometric tile pattern (inspired by ceramic zellige) */
+.tunisian-pattern {
+  background-color: #F5F0E8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L40 20L20 40L0 20z' fill='none' stroke='%238B7244' stroke-width='0.2' opacity='0.12'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='2' fill='%230E509D' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+/* Hero warm gradient overlay */
+.hero-warm-overlay {
+  background: linear-gradient(135deg, rgba(245, 240, 232, 0.97) 0%, rgba(248, 243, 235, 0.95) 50%, rgba(235, 228, 218, 0.98) 100%);
+}
+
+/* Tunisian star / decorative border */
+.hero-border-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10h10l5-5 5 5 5-5 5 5 5-5 5 5 5-5 5 5 5-5 5 5 5-5 5 5h10' fill='none' stroke='%238B7244' stroke-width='0.5' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+.gold-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-secondary), transparent);
+  opacity: 0.6;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
