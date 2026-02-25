@@ -13,7 +13,7 @@ export default function OrderConfirmation() {
         </p>
         <Link
           to="/"
-          className="inline-block px-8 py-3 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 transition-all"
+          className="inline-flex items-center justify-center px-8 py-3.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 transition-all min-h-[48px]"
         >
           Retour à l'accueil
         </Link>

@@ -28,7 +28,7 @@ export default function ProductCard({ item }: ProductCardProps) {
 
   return (
     <article
-      className={`rounded-[var(--radius-card)] bg-[var(--color-bg-card)] p-5 shadow-[var(--shadow-soft)] border transition-all hover:shadow-[var(--shadow-card)] ${
+      className={`rounded-[var(--radius-card)] bg-[var(--color-bg-card)] p-4 sm:p-5 shadow-[var(--shadow-soft)] border transition-all hover:shadow-[var(--shadow-card)] min-w-0 ${
         item.formuleMidi ? 'border-[var(--color-secondary)] border-2 ring-2 ring-[var(--color-secondary)]/20' : 'border-[var(--color-primary)]/10'
       }`}
     >
@@ -86,21 +86,21 @@ export default function ProductCard({ item }: ProductCardProps) {
         </div>
       )}
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center rounded-[var(--radius-card)] border border-[var(--color-primary)]/20 overflow-hidden">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center rounded-[var(--radius-card)] border border-[var(--color-primary)]/20 overflow-hidden shrink-0">
           <button
             type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="w-10 h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+            className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
             aria-label="Diminuer"
           >
             −
           </button>
-          <span className="w-10 text-center font-medium">{quantity}</span>
+          <span className="w-10 text-center font-medium min-h-[44px] sm:min-h-0 flex items-center justify-center">{quantity}</span>
           <button
             type="button"
             onClick={() => setQuantity((q) => q + 1)}
-            className="w-10 h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+            className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
             aria-label="Augmenter"
           >
             +
@@ -109,7 +109,7 @@ export default function ProductCard({ item }: ProductCardProps) {
         <button
           type="button"
           onClick={handleAdd}
-          className="flex-1 min-w-[140px] py-2.5 px-4 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 transition-all"
+          className="flex-1 w-full sm:w-auto min-w-0 sm:min-w-[140px] py-3 sm:py-2.5 px-4 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 transition-all min-h-[44px]"
         >
           Ajouter au panier
         </button>

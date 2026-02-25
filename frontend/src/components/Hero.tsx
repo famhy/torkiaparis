@@ -83,16 +83,16 @@ export default function Hero() {
           <span className="text-[var(--color-primary)]/90 font-medium">préparés avec passion.</span>
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in animation-delay-300">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center w-full sm:w-auto max-w-sm sm:max-w-none mx-auto animate-fade-in animation-delay-300">
           <Link
             to="/#menu"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium shadow-[var(--shadow-card)] hover:opacity-95 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium shadow-[var(--shadow-card)] hover:opacity-95 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] min-h-[48px]"
           >
             Commander maintenant
           </Link>
           <a
             href="#galerie"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[var(--radius-card)] border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-medium hover:bg-[var(--color-secondary)]/10 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-[var(--radius-card)] border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-medium hover:bg-[var(--color-secondary)]/10 transition-all duration-300 min-h-[48px]"
           >
             Découvrir nos créations
           </a>

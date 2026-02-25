@@ -1,14 +1,31 @@
 const VITE_API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api'
 
+export interface AdminOrderItem {
+  name?: string
+  label?: string
+  quantity: number
+  price?: number
+  /** When sent from checkout, items are CartItem[] with item: { name, price } */
+  item?: { name?: string; price?: number }
+}
+
 export interface AdminOrder {
   id: string
   nom: string
   telephone?: string
   adresse?: string
+  codePostal?: string
+  instructions?: string
+  deliveryType?: string
+  paymentMethod?: string
+  subtotal?: number
+  deliveryFee?: number
+  promoDiscount?: number
   total: number
+  promoCode?: string
   status?: string
   createdAt: string
-  items?: { name: string; quantity: number; price: number }[]
+  items?: AdminOrderItem[]
 }
 
 export async function fetchOrders(): Promise<AdminOrder[]> {
@@ -16,6 +33,33 @@ export async function fetchOrders(): Promise<AdminOrder[]> {
   if (!res.ok) return []
   const data = await res.json()
   return Array.isArray(data) ? data : []
+}
+
+export async function fetchOrderById(id: string): Promise<AdminOrder | null> {
+  const res = await fetch(`${VITE_API_BASE}/orders/${id}`)
+  if (!res.ok) return null
+  return res.json()
+}
+
+/** Status values for the Trello-style board */
+export const ORDER_STATUSES = [
+  { id: 'nouvelle', label: 'Nouvelle' },
+  { id: 'en_preparation', label: 'En préparation' },
+  { id: 'pret', label: 'Prêt' },
+] as const
+
+export type OrderStatusId = (typeof ORDER_STATUSES)[number]['id']
+
+export async function updateOrderStatus(orderId: string, status: string): Promise<void> {
+  const res = await fetch(`${VITE_API_BASE}/orders/${orderId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(err || 'Erreur mise à jour statut')
+  }
 }
 
 export interface CreateCategoryBody {

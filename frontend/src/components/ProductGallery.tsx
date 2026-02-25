@@ -85,8 +85,8 @@ export default function ProductGallery() {
   const rest = galleryItems.filter((i) => !i.featured)
 
   return (
-    <section id="galerie" className="py-16 sm:py-20 bg-[var(--color-bg-card)] scroll-mt-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="galerie" className="py-12 sm:py-20 bg-[var(--color-bg-card)] scroll-mt-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-hidden">
         <div className="text-center mb-12">
           <div className="gold-divider w-24 mx-auto mb-6" />
           <h2 className="font-[var(--font-heading)] text-3xl sm:text-4xl font-semibold text-[var(--color-primary)] mb-3">

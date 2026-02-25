@@ -8,10 +8,14 @@ import {
   updateCategory,
   deleteCategory,
   createProduct,
+  updateOrderStatus,
+  ORDER_STATUSES,
   type AdminOrder,
+  type AdminOrderItem,
   type CreateCategoryBody,
   type UpdateCategoryBody,
   type CreateProductBody,
+  type OrderStatusId,
 } from '../api/admin'
 import { useAdminAuth } from '../context/AdminAuthContext'
 import { useMenu } from '../context/MenuContext'
@@ -77,8 +81,8 @@ export default function Admin() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
-        <div className="w-full max-w-sm rounded-[var(--radius-card)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)] p-8">
+      <div className="min-h-[60vh] flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm rounded-[var(--radius-card)] bg-[var(--color-bg-card)] shadow-[var(--shadow-card)] p-6 sm:p-8">
           <h1 className="font-[var(--font-heading)] text-2xl font-semibold text-[var(--color-primary)] mb-2">
             Connexion admin
           </h1>
@@ -109,74 +113,134 @@ export default function Admin() {
     )
   }
 
-  const tabs: { id: Tab; label: string }[] = [
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  const navItems: { id: Tab; label: string }[] = [
     { id: 'orders', label: 'Commandes' },
     { id: 'categories', label: 'Catégories' },
     { id: 'products', label: 'Produits' },
   ]
 
+  const closeMobileSidebar = () => setMobileSidebarOpen(false)
+  const openMobileSidebar = () => setMobileSidebarOpen(true)
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <h1 className="font-[var(--font-heading)] text-3xl font-semibold text-[var(--color-primary)]">
-          Tableau de bord
-        </h1>
-        <button
-          type="button"
-          onClick={logout}
-          className="text-sm text-gray-500 hover:text-gray-700 underline"
-        >
-          Déconnexion
-        </button>
-      </div>
+    <div className="min-h-screen flex bg-[var(--color-bg)] min-w-0">
+      {/* Mobile sidebar overlay */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={closeMobileSidebar}
+          aria-hidden
+        />
+      )}
 
-      <div className="flex gap-2 mb-8 flex-wrap">
-        {tabs.map(({ id, label }) => (
+      {/* Sidebar: drawer on mobile, static on md+ */}
+      <aside
+        className={`fixed md:relative inset-y-0 left-0 z-50 w-64 sm:w-56 md:w-56 shrink-0 flex flex-col border-r border-gray-200 bg-[var(--color-bg-card)] shadow-[var(--shadow-soft)] min-h-screen transition-transform duration-200 ease-out md:translate-x-0 ${
+          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+          <h1 className="font-[var(--font-heading)] text-lg sm:text-xl font-semibold text-[var(--color-primary)]">
+            Tableau de bord
+          </h1>
           <button
-            key={id}
             type="button"
-            onClick={() => setActiveTab(id)}
-            className={`px-4 py-2 rounded-[var(--radius-card)] font-medium transition-colors ${
-              activeTab === id
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            onClick={closeMobileSidebar}
+            className="md:hidden p-2 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Fermer le menu"
           >
-            {label}
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
-        ))}
-      </div>
+        </div>
+        <nav className="p-2 flex-1">
+          {navItems.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => {
+                setActiveTab(id)
+                closeMobileSidebar()
+              }}
+              className={`w-full text-left px-4 py-3 rounded-[var(--radius-card)] font-medium transition-colors min-h-[48px] flex items-center ${
+                activeTab === id
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="p-2 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full text-left px-4 py-3 text-sm text-gray-500 hover:text-gray-700 min-h-[48px] flex items-center"
+          >
+            Déconnexion
+          </button>
+        </div>
+      </aside>
 
-      {error && (
-        <p className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{error}</p>
-      )}
+      {/* Main content */}
+      <main className="flex-1 overflow-auto min-w-0">
+        <div className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
+          {/* Mobile: menu button */}
+          <button
+            type="button"
+            onClick={openMobileSidebar}
+            className="md:hidden mb-4 p-3 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium flex items-center gap-2 min-h-[44px]"
+            aria-label="Ouvrir le menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            Menu
+          </button>
+          {error && (
+            <p className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{error}</p>
+          )}
 
-      {activeTab === 'orders' && (
-        <OrdersTab
-          orders={orders}
-          loading={loading}
-          onRefresh={loadOrders}
-        />
-      )}
+          {activeTab === 'orders' && (
+            <OrdersTab
+              orders={orders}
+              loading={loading}
+              onRefresh={loadOrders}
+            />
+          )}
 
-      {activeTab === 'categories' && (
-        <CategoriesTab
-          categories={categories}
-          loading={loading}
-          onRefresh={refreshCategoriesAndMenu}
-        />
-      )}
+          {activeTab === 'categories' && (
+            <CategoriesTab
+              categories={categories}
+              loading={loading}
+              onRefresh={refreshCategoriesAndMenu}
+            />
+          )}
 
-      {activeTab === 'products' && (
-        <ProductsTab
-          products={products}
-          categories={categories}
-          loading={loading}
-          onRefresh={loadProducts}
-        />
-      )}
+          {activeTab === 'products' && (
+            <ProductsTab
+              products={products}
+              categories={categories}
+              loading={loading}
+              onRefresh={loadProducts}
+            />
+          )}
+        </div>
+      </main>
     </div>
   )
+}
+
+/** Normalize backend status to our board columns (pending -> nouvelle) */
+function orderStatusForBoard(status: string | undefined): OrderStatusId {
+  const s = (status ?? 'pending').toLowerCase()
+  if (s === 'en_preparation' || s === 'en preparation') return 'en_preparation'
+  if (s === 'pret' || s === 'ready') return 'pret'
+  return 'nouvelle'
 }
 
 function OrdersTab({
@@ -188,10 +252,31 @@ function OrdersTab({
   loading: boolean
   onRefresh: () => void
 }) {
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
+
+  const ordersByStatus = (statusId: OrderStatusId) =>
+    orders.filter((o) => orderStatusForBoard(o.status) === statusId)
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatusId) => {
+    setUpdatingId(orderId)
+    try {
+      await updateOrderStatus(orderId, newStatus)
+      onRefresh()
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+      }
+    } catch {
+      // keep current state on error
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   return (
-    <div className="rounded-[var(--radius-card)] bg-[var(--color-bg-card)] shadow-[var(--shadow-soft)] overflow-hidden">
-      <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-        <h2 className="font-[var(--font-heading)] text-lg font-semibold text-[var(--color-primary)]">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="font-[var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
           Commandes
         </h2>
         <button
@@ -202,31 +287,272 @@ function OrdersTab({
           Actualiser
         </button>
       </div>
+
       {loading ? (
         <p className="p-6 text-gray-500">Chargement...</p>
-      ) : orders.length === 0 ? (
-        <p className="p-6 text-gray-500">Aucune commande pour le moment.</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
-          {orders.map((o) => (
-            <li key={o.id} className="p-4 flex justify-between items-start gap-4">
-              <div>
-                <p className="font-medium text-[var(--color-primary)]">{o.nom}</p>
-                {o.telephone && (
-                  <p className="text-sm text-gray-500">{o.telephone}</p>
-                )}
-                <p className="text-sm text-gray-500">
-                  {new Date(o.createdAt).toLocaleString('fr-FR')}
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {ORDER_STATUSES.map(({ id, label }) => (
+            <div
+              key={id}
+              className="rounded-[var(--radius-card)] bg-gray-100/80 border border-gray-200 min-h-[200px] flex flex-col"
+            >
+              <div className="p-3 border-b border-gray-200 bg-white/80 rounded-t-[var(--radius-card)]">
+                <h3 className="font-semibold text-gray-800">{label}</h3>
+                <span className="text-sm text-gray-500">
+                  {ordersByStatus(id).length} commande{ordersByStatus(id).length !== 1 ? 's' : ''}
+                </span>
               </div>
-              <span className="font-semibold text-[var(--color-secondary)] shrink-0">
-                {Number(o.total).toFixed(2)}€
-              </span>
-            </li>
+              <div className="p-2 flex-1 overflow-y-auto space-y-2">
+                {ordersByStatus(id).length === 0 ? (
+                  <p className="text-sm text-gray-400 p-2">Aucune</p>
+                ) : (
+                  ordersByStatus(id).map((o) => (
+                    <OrderCard
+                      key={o.id}
+                      order={o}
+                      currentStatus={id}
+                      onStatusChange={handleStatusChange}
+                      onViewDetails={() => setSelectedOrder(o)}
+                      updating={updatingId === o.id}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
+      )}
+
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          currentStatus={orderStatusForBoard(selectedOrder.status)}
+          onStatusChange={(status) => handleStatusChange(selectedOrder.id, status)}
+          onClose={() => setSelectedOrder(null)}
+          updating={updatingId === selectedOrder.id}
+        />
       )}
     </div>
+  )
+}
+
+function OrderCard({
+  order,
+  currentStatus,
+  onStatusChange,
+  onViewDetails,
+  updating,
+}: {
+  order: AdminOrder
+  currentStatus: OrderStatusId
+  onStatusChange: (orderId: string, status: OrderStatusId) => void
+  onViewDetails: () => void
+  updating: boolean
+}) {
+  return (
+    <div className="rounded-lg bg-[var(--color-bg-card)] border border-gray-200 shadow-sm p-3 hover:shadow-[var(--shadow-soft)] transition-shadow">
+      <button
+        type="button"
+        onClick={onViewDetails}
+        className="w-full text-left block"
+      >
+        <p className="font-medium text-[var(--color-primary)]">{order.nom}</p>
+        {order.telephone && (
+          <p className="text-xs text-gray-500 mt-0.5">{order.telephone}</p>
+        )}
+        <p className="text-xs text-gray-500 mt-0.5">
+          {new Date(order.createdAt).toLocaleString('fr-FR')}
+        </p>
+        <p className="text-sm font-semibold text-[var(--color-secondary)] mt-1">
+          {Number(order.total).toFixed(2)}€
+        </p>
+      </button>
+      <div className="mt-2 pt-2 border-t border-gray-100">
+        <button
+          type="button"
+          onClick={onViewDetails}
+          className="text-xs text-[var(--color-primary)] hover:underline mb-1"
+        >
+          Voir le détail
+        </button>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Changer le statut</label>
+        <select
+          value={currentStatus}
+          onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatusId)}
+          disabled={updating}
+          className="w-full text-sm rounded border border-gray-300 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
+        >
+          {ORDER_STATUSES.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  )
+}
+
+function OrderDetailModal({
+  order,
+  currentStatus,
+  onStatusChange,
+  onClose,
+  updating,
+}: {
+  order: AdminOrder
+  currentStatus: OrderStatusId
+  onStatusChange: (status: OrderStatusId) => void
+  onClose: () => void
+  updating: boolean
+}) {
+  const itemName = (it: AdminOrderItem) => it.name ?? it.label ?? it.item?.name ?? 'Article'
+  const itemPrice = (it: AdminOrderItem) => {
+    const q = it.quantity || 1
+    const p = it.price ?? it.item?.price ?? 0
+    return q * Number(p)
+  }
+  const deliveryLabel = order.deliveryType === 'click_collect' ? 'Click & Collect' : order.deliveryType === 'livraison' ? 'Livraison' : order.deliveryType ?? '—'
+  const paymentLabel = order.paymentMethod === 'card' ? 'Carte bancaire' : order.paymentMethod === 'livraison' ? 'À la livraison' : order.paymentMethod ?? '—'
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/50 z-50"
+        onClick={onClose}
+        aria-hidden
+      />
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+        role="dialog"
+        aria-modal
+        aria-labelledby="order-detail-title"
+      >
+        <div
+          className="relative w-full max-w-lg rounded-[var(--radius-card)] bg-[var(--color-bg-card)] shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sticky top-0 bg-[var(--color-bg-card)] border-b border-gray-100 p-4 flex items-center justify-between shrink-0">
+            <h2 id="order-detail-title" className="font-[var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
+              Détail de la commande
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Fermer"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Client</h3>
+              <p className="font-medium text-[var(--color-primary)]">{order.nom}</p>
+              {order.telephone && (
+                <p className="text-sm text-gray-600 mt-0.5">
+                  <a href={`tel:${order.telephone}`} className="text-[var(--color-primary)] hover:underline">{order.telephone}</a>
+                </p>
+              )}
+            </div>
+
+            {(order.adresse || order.codePostal) && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Adresse</h3>
+                <p className="text-gray-700">
+                  {order.adresse}
+                  {order.codePostal && <br />}
+                  {order.codePostal && <span>{order.codePostal}</span>}
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Retrait</h3>
+                <p className="text-gray-700">{deliveryLabel}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Paiement</h3>
+                <p className="text-gray-700">{paymentLabel}</p>
+              </div>
+            </div>
+
+            {order.instructions && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Instructions</h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{order.instructions}</p>
+              </div>
+            )}
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Articles</h3>
+              <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden">
+                {order.items && order.items.length > 0 ? (
+                  order.items.map((item, i) => (
+                    <li key={i} className="flex justify-between items-center px-3 py-2 bg-gray-50/50">
+                      <span className="text-gray-800">
+                        {itemName(item)} × {item.quantity}
+                      </span>
+                      <span className="font-medium text-[var(--color-secondary)]">
+                        {itemPrice(item).toFixed(2)}€
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-3 py-2 text-gray-500 text-sm">Aucun détail</li>
+                )}
+              </ul>
+            </div>
+
+            <div className="border-t border-gray-200 pt-4 space-y-1">
+              {order.subtotal != null && (
+                <div className="flex justify-between text-sm">
+                  <span>Sous-total</span>
+                  <span>{Number(order.subtotal).toFixed(2)}€</span>
+                </div>
+              )}
+              {order.deliveryFee != null && Number(order.deliveryFee) > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>Frais de livraison</span>
+                  <span>{Number(order.deliveryFee).toFixed(2)}€</span>
+                </div>
+              )}
+              {order.promoCode && order.promoDiscount != null && Number(order.promoDiscount) > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Réduction ({order.promoCode})</span>
+                  <span>−{Number(order.promoDiscount).toFixed(2)}€</span>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold text-[var(--color-primary)] pt-2">
+                <span>Total</span>
+                <span>{Number(order.total).toFixed(2)}€</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+              <select
+                value={currentStatus}
+                onChange={(e) => onStatusChange(e.target.value as OrderStatusId)}
+                disabled={updating}
+                className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
+              >
+                {ORDER_STATUSES.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -401,83 +727,98 @@ function CategoriesTab({
         ) : categories.length === 0 ? (
           <p className="p-6 text-gray-500">Aucune catégorie.</p>
         ) : (
-          <ul className="divide-y divide-gray-100">
-            {categories.map((c) => (
-              <li key={c.id} className="p-4">
-                {editing?.id === c.id ? (
-                  <form onSubmit={handleUpdate} className="flex flex-wrap items-end gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-0.5">Nom</label>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        required
-                        className="w-40 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-0.5">Slug</label>
-                      <input
-                        type="text"
-                        value={editSlug}
-                        onChange={(e) => setEditSlug(e.target.value)}
-                        className="w-32 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-0.5">Ordre</label>
-                      <input
-                        type="number"
-                        value={editOrder}
-                        onChange={(e) => setEditOrder(parseInt(e.target.value, 10) || 0)}
-                        min={0}
-                        className="w-16 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="px-3 py-1.5 rounded bg-[var(--color-primary)] text-white text-sm font-medium disabled:opacity-50"
-                    >
-                      Enregistrer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelEdit}
-                      className="px-3 py-1.5 rounded border border-gray-300 text-gray-700 text-sm"
-                    >
-                      Annuler
-                    </button>
-                  </form>
-                ) : (
-                  <div className="flex justify-between items-center gap-4">
-                    <div>
-                      <span className="font-medium">{c.name}</span>
-                      <span className="text-sm text-gray-500 ml-2">{c.slug} (ordre: {c.order})</span>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(c)}
-                        className="px-2 py-1 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(c)}
-                        disabled={deletingId === c.id}
-                        className="px-2 py-1 rounded border border-red-200 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                      >
-                        {deletingId === c.id ? 'Suppression...' : 'Supprimer'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-4 py-3 font-semibold text-gray-700">Nom</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Slug</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Ordre</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((c) => (
+                  <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    {editing?.id === c.id ? (
+                      <>
+                        <td colSpan={4} className="p-4">
+                          <form onSubmit={handleUpdate} className="flex flex-wrap items-end gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Nom</label>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                required
+                                className="w-40 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Slug</label>
+                              <input
+                                type="text"
+                                value={editSlug}
+                                onChange={(e) => setEditSlug(e.target.value)}
+                                className="w-32 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Ordre</label>
+                              <input
+                                type="number"
+                                value={editOrder}
+                                onChange={(e) => setEditOrder(parseInt(e.target.value, 10) || 0)}
+                                min={0}
+                                className="w-16 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <button
+                              type="submit"
+                              disabled={submitting}
+                              className="px-3 py-1.5 rounded bg-[var(--color-primary)] text-white text-sm font-medium disabled:opacity-50"
+                            >
+                              Enregistrer
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              className="px-3 py-1.5 rounded border border-gray-300 text-gray-700 text-sm"
+                            >
+                              Annuler
+                            </button>
+                          </form>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-3 font-medium">{c.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{c.slug}</td>
+                        <td className="px-4 py-3 text-gray-600">{c.order}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(c)}
+                            className="px-2 py-1 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 mr-1"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(c)}
+                            disabled={deletingId === c.id}
+                            className="px-2 py-1 rounded border border-red-200 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {deletingId === c.id ? 'Suppression...' : 'Supprimer'}
+                          </button>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -651,21 +992,36 @@ function ProductsTab({
         ) : products.length === 0 ? (
           <p className="p-6 text-gray-500">Aucun produit.</p>
         ) : (
-          <ul className="divide-y divide-gray-100">
-            {products.map((p) => (
-              <li key={p.id} className="p-4 flex justify-between items-center gap-4">
-                <div>
-                  <span className="font-medium">{p.name}</span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({p.category?.name ?? p.categoryId})
-                  </span>
-                </div>
-                <span className="text-[var(--color-secondary)] font-medium">
-                  {typeof p.price === 'string' ? p.price : p.price.toFixed(2)}€
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-4 py-3 font-semibold text-gray-700">Nom</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 max-w-[200px]">Description</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Catégorie</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Prix</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Best-seller</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Disponible</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    <td className="px-4 py-3 font-medium">{p.name}</td>
+                    <td className="px-4 py-3 text-gray-600 text-sm max-w-[200px] truncate" title={p.description ?? ''}>
+                      {p.description ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{p.category?.name ?? p.categoryId}</td>
+                    <td className="px-4 py-3 text-[var(--color-secondary)] font-medium">
+                      {typeof p.price === 'string' ? p.price : Number(p.price).toFixed(2)}€
+                    </td>
+                    <td className="px-4 py-3">{p.isBestseller ? 'Oui' : '—'}</td>
+                    <td className="px-4 py-3">{p.isAvailable ? 'Oui' : 'Non'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,8 @@
 export default function Footer() {
   return (
-    <footer id="footer" className="bg-[var(--color-primary)] text-white py-12 sm:py-16">
+    <footer id="footer" className="bg-[var(--color-primary)] text-white py-10 sm:py-16 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="font-[var(--font-heading)] text-xl font-semibold mb-4 text-[var(--color-secondary)]">
               Torkia Paris

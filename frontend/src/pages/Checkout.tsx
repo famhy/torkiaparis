@@ -74,8 +74,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10 sm:py-16">
-      <h1 className="font-[var(--font-heading)] text-3xl font-semibold text-[var(--color-primary)] mb-8">
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-16">
+      <h1 className="font-[var(--font-heading)] text-2xl sm:text-3xl font-semibold text-[var(--color-primary)] mb-6 sm:mb-8">
         Passer la commande
       </h1>
 
@@ -87,7 +87,7 @@ export default function Checkout() {
             required
             value={form.nom}
             onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))}
-            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-base"
             placeholder="Votre nom"
           />
         </div>
@@ -98,7 +98,7 @@ export default function Checkout() {
             required
             value={form.telephone}
             onChange={(e) => setForm((f) => ({ ...f, telephone: e.target.value }))}
-            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-base"
             placeholder="06 12 34 56 78"
           />
         </div>
@@ -109,7 +109,7 @@ export default function Checkout() {
             required={form.deliveryType === 'livraison'}
             value={form.adresse}
             onChange={(e) => setForm((f) => ({ ...f, adresse: e.target.value }))}
-            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-base"
             placeholder="Numéro et rue"
           />
         </div>
@@ -120,7 +120,7 @@ export default function Checkout() {
             required
             value={form.codePostal}
             onChange={(e) => setForm((f) => ({ ...f, codePostal: e.target.value }))}
-            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-base"
             placeholder="75009"
           />
         </div>
@@ -130,14 +130,14 @@ export default function Checkout() {
             value={form.instructions}
             onChange={(e) => setForm((f) => ({ ...f, instructions: e.target.value }))}
             rows={3}
-            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+            className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] text-base"
             placeholder="Allergies, étage, code d'accès..."
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Mode de retrait</label>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
@@ -189,18 +189,18 @@ export default function Checkout() {
 
         <div className="rounded-[var(--radius-card)] border border-[var(--color-secondary)]/30 p-4 bg-[var(--color-bg)]">
           <label className="block text-sm font-medium text-gray-700 mb-2">Code promo</label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={promoInput}
               onChange={(e) => { setPromoInput(e.target.value); setPromoError('') }}
               placeholder="Ex: BIENVENUE"
-              className="flex-1 rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 uppercase"
+              className="flex-1 min-w-0 rounded-[var(--radius-card)] border border-gray-300 px-4 py-3 sm:py-2.5 uppercase text-base"
             />
             <button
               type="button"
               onClick={handlePromo}
-              className="px-4 py-2.5 rounded-[var(--radius-card)] border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-medium hover:bg-[var(--color-secondary)]/10"
+              className="px-4 py-3 sm:py-2.5 rounded-[var(--radius-card)] border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-medium hover:bg-[var(--color-secondary)]/10 min-h-[48px] shrink-0"
             >
               Appliquer
             </button>
@@ -240,7 +240,7 @@ export default function Checkout() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-3.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 disabled:opacity-70 transition-all"
+          className="w-full py-3.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:opacity-95 disabled:opacity-70 transition-all min-h-[48px]"
         >
           {submitting ? 'Envoi en cours...' : 'Confirmer la commande'}
         </button>

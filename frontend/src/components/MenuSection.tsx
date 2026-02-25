@@ -57,13 +57,13 @@ export default function MenuSection() {
 
         {categories.length > 0 && (
           <>
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
+            <div className="flex overflow-x-auto gap-2 pb-2 mb-10 -mx-1 px-1 scrollbar-thin snap-x snap-mandatory sm:flex-wrap sm:justify-center sm:overflow-visible sm:pb-0 sm:-mx-0 sm:px-0">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-5 py-2.5 rounded-[var(--radius-card)] font-medium transition-all ${
+                  className={`shrink-0 snap-start px-4 py-3 sm:px-5 sm:py-2.5 rounded-[var(--radius-card)] font-medium transition-all min-h-[44px] ${
                     activeCategory === cat.id
                       ? 'bg-[var(--color-primary)] text-white shadow-[var(--shadow-soft)]'
                       : 'bg-[var(--color-bg-card)] text-[var(--color-primary)] border border-[var(--color-primary)]/20 hover:border-[var(--color-secondary)] hover:text-[var(--color-secondary)]'
@@ -74,7 +74,7 @@ export default function MenuSection() {
               ))}
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((item) => (
                 <ProductCard key={item.id} item={item} />
               ))}

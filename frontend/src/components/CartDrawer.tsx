@@ -27,18 +27,18 @@ export default function CartDrawer() {
         aria-hidden
       />
       <aside
-        className="fixed top-0 right-0 h-full w-full max-w-md bg-[var(--color-bg-card)] shadow-2xl z-50 flex flex-col animate-slide-in-right"
+        className="fixed top-0 right-0 h-full w-full max-w-md bg-[var(--color-bg-card)] shadow-2xl z-50 flex flex-col animate-slide-in-right max-h-[100dvh]"
         aria-modal
         aria-label="Panier"
       >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--color-primary)]/10">
-          <h2 className="font-[var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-primary)]/10 shrink-0">
+          <h2 className="font-[var(--font-heading)] text-lg sm:text-xl font-semibold text-[var(--color-primary)]">
             Votre panier
           </h2>
           <button
             type="button"
             onClick={toggleCart}
-            className="p-2 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600"
+            className="p-3 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600 min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Fermer le panier"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,19 +65,19 @@ export default function CartDrawer() {
                         {getCartItemTotal(cartItem).toFixed(2)}€
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 rounded-[var(--radius-card)] border border-[var(--color-primary)]/20">
+                    <div className="flex items-center gap-0 rounded-[var(--radius-card)] border border-[var(--color-primary)]/20 shrink-0">
                       <button
                         type="button"
                         onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity - 1, optionsKey)}
-                        className="w-8 h-8 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
+                        className="w-10 h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 min-h-[44px] min-w-[44px]"
                       >
                         −
                       </button>
-                      <span className="w-8 text-center text-sm font-medium">{cartItem.quantity}</span>
+                      <span className="w-10 text-center text-sm font-medium min-h-[44px] flex items-center justify-center">{cartItem.quantity}</span>
                       <button
                         type="button"
                         onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity + 1, optionsKey)}
-                        className="w-8 h-8 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
+                        className="w-10 h-10 flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 min-h-[44px] min-w-[44px]"
                       >
                         +
                       </button>
@@ -85,7 +85,7 @@ export default function CartDrawer() {
                     <button
                       type="button"
                       onClick={() => removeItem(cartItem.item.id, optionsKey)}
-                      className="text-red-500 hover:text-red-700 p-1"
+                      className="text-red-500 hover:text-red-700 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       aria-label="Retirer"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@ export default function CartDrawer() {
             <Link
               to="/checkout"
               onClick={toggleCart}
-              className="block w-full py-3.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white text-center font-medium hover:opacity-95 transition-all mt-4"
+              className="block w-full py-3.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white text-center font-medium hover:opacity-95 transition-all mt-4 min-h-[48px] flex items-center justify-center"
             >
               Passer la commande
             </Link>
