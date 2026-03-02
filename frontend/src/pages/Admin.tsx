@@ -8,6 +8,7 @@ import {
   updateCategory,
   deleteCategory,
   createProduct,
+  uploadImage,
   updateOrderStatus,
   ORDER_STATUSES,
   type AdminOrder,
@@ -33,6 +34,7 @@ export default function Admin() {
   const [products, setProducts] = useState<ApiProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   const loadOrders = useCallback(() => {
     fetchOrders()
@@ -112,8 +114,6 @@ export default function Admin() {
       </div>
     )
   }
-
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   const navItems: { id: Tab; label: string }[] = [
     { id: 'orders', label: 'Commandes' },
@@ -840,6 +840,7 @@ function ProductsTab({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [categoryId, setCategoryId] = useState('')
   const [isBestseller, setIsBestseller] = useState(false)
   const [isAvailable, setIsAvailable] = useState(true)
@@ -857,24 +858,29 @@ function ProductsTab({
       setMessage({ type: 'err', text: 'Prix invalide' })
       return
     }
-    const body: CreateProductBody = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      price: numPrice,
-      imageUrl: imageUrl.trim() || undefined,
-      categoryId: categoryId || categories[0]?.id,
-      isBestseller,
-      isAvailable,
-    }
     setSubmitting(true)
     setMessage(null)
     try {
+      let finalImageUrl = imageUrl.trim() || undefined
+      if (imageFile) {
+        finalImageUrl = await uploadImage(imageFile)
+      }
+      const body: CreateProductBody = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        price: numPrice,
+        imageUrl: finalImageUrl,
+        categoryId: categoryId || categories[0]?.id,
+        isBestseller,
+        isAvailable,
+      }
       await createProduct(body)
       setMessage({ type: 'ok', text: 'Produit ajouté.' })
       setName('')
       setDescription('')
       setPrice('')
       setImageUrl('')
+      setImageFile(null)
       setIsBestseller(false)
       setIsAvailable(true)
       onRefresh()
@@ -929,14 +935,56 @@ function ProductsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image (URL)</label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              placeholder="Optionnel"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Image — affichée sur le menu</label>
+            <div className="flex flex-wrap gap-4 items-start">
+              <div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    setImageFile(f || null)
+                    if (!f) return
+                    setImageUrl('')
+                  }}
+                  className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-[var(--radius-card)] file:border-0 file:text-sm file:font-medium file:bg-[var(--color-primary)] file:text-white file:cursor-pointer hover:file:bg-[var(--color-primary)]/90"
+                />
+                <p className="mt-1 text-xs text-gray-500">JPEG, PNG, GIF ou WebP — max 5 Mo</p>
+              </div>
+              <span className="text-gray-400 text-sm">ou</span>
+              <div className="flex-1 min-w-[200px]">
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value)
+                    setImageFile(null)
+                  }}
+                  className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  placeholder="URL (ex: https://exemple.com/image.jpg)"
+                />
+              </div>
+            </div>
+            {(imageUrl.trim() || imageFile) && (
+              <div className="mt-2 w-24 h-24 rounded-lg border border-gray-200 overflow-hidden bg-gray-100">
+                {imageFile ? (
+                  <img
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Aperçu"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={imageUrl.trim()}
+                    alt="Aperçu"
+                    className="w-full h-full object-cover"
+                    onError={({ currentTarget }) => {
+                      currentTarget.style.display = 'none'
+                    }}
+                  />
+                )}
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
@@ -996,6 +1044,7 @@ function ProductsTab({
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-4 py-3 font-semibold text-gray-700 w-20">Image</th>
                   <th className="px-4 py-3 font-semibold text-gray-700">Nom</th>
                   <th className="px-4 py-3 font-semibold text-gray-700 max-w-[200px]">Description</th>
                   <th className="px-4 py-3 font-semibold text-gray-700">Catégorie</th>
@@ -1005,8 +1054,25 @@ function ProductsTab({
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
+                {products.map((p) => {
+                  const imgUrl = p.imageUrl?.trim() || null
+                  return (
                   <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    <td className="px-4 py-2">
+                      <div className="w-14 h-14 rounded-lg border border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
+                        {imgUrl ? (
+                          <img
+                            src={imgUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 font-medium">{p.name}</td>
                     <td className="px-4 py-3 text-gray-600 text-sm max-w-[200px] truncate" title={p.description ?? ''}>
                       {p.description ?? '—'}
@@ -1018,7 +1084,8 @@ function ProductsTab({
                     <td className="px-4 py-3">{p.isBestseller ? 'Oui' : '—'}</td>
                     <td className="px-4 py-3">{p.isAvailable ? 'Oui' : 'Non'}</td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>

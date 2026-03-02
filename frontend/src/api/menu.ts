@@ -20,6 +20,7 @@ export function mapApiProductToMenuItem(p: ApiProduct): MenuItem {
     description: p.description ?? '',
     price,
     category: p.category.slug,
+    imageUrl: p.imageUrl ?? null,
     bestSeller: p.isBestseller,
     options,
   }

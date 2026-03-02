@@ -13,6 +13,7 @@ export interface MenuItem {
   description: string
   price: number
   category: CategoryId
+  imageUrl?: string | null
   bestSeller?: boolean
   formuleMidi?: boolean
   options?: ProductOption[]

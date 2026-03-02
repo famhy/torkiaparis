@@ -2,45 +2,113 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-async function main() {
-  const kaskrout = await prisma.category.upsert({
-    where: { slug: 'kaskrout' },
-    update: {},
-    create: { name: 'Kaskrout', slug: 'kaskrout', order: 0 },
-  })
-  const fricasse = await prisma.category.upsert({
-    where: { slug: 'fricasse' },
-    update: {},
-    create: { name: 'Fricassé', slug: 'fricasse', order: 1 },
-  })
-  const entrees = await prisma.category.upsert({
-    where: { slug: 'entrees' },
-    update: {},
-    create: { name: 'Entrées', slug: 'entrees', order: 2 },
-  })
-  const desserts = await prisma.category.upsert({
-    where: { slug: 'desserts' },
-    update: {},
-    create: { name: 'Desserts', slug: 'desserts', order: 3 },
-  })
-  const boissons = await prisma.category.upsert({
-    where: { slug: 'boissons' },
-    update: {},
-    create: { name: 'Boissons', slug: 'boissons', order: 4 },
-  })
+const MENU_DATA = [
+  {
+    categorie: "Entrées",
+    produits: [
+      { nom: "L'Assiette de Torkia", prix: 13.9 },
+      { nom: "La Mini Assiette de Torkia", prix: 7.9 },
+      { nom: "Brique au Thon", prix: 6.9 },
+      { nom: "Brique à l'Oeuf", prix: 6.9 },
+      { nom: "Mix d'Entrées à Partager", prix: 19.9 },
+    ],
+  },
+  {
+    categorie: "Le Fricassé",
+    produits: [
+      { nom: "Fric Morning", prix: 4.9 },
+      { nom: "Le Classique", prix: 6.9 },
+      { nom: "Fricassé de la Cheffe", prix: 8.9 },
+      { nom: "Le Veggie", prix: 6.9 },
+      { nom: "Le Poulet", prix: 6.9 },
+      { nom: "Fricassé Lablebi", prix: 6.9 },
+      { nom: "Les Mini Fricassés", prix: 2.5 },
+      { nom: "L'Incontournable Lablebi de Torkia", prix: 13.9 },
+    ],
+  },
+  {
+    categorie: "Le Kaskrout",
+    produits: [
+      { nom: "Le Classique", prix: 9.9 },
+      { nom: "Le Veggie", prix: 9.9 },
+      { nom: "Le Poulet", prix: 9.9 },
+      { nom: "Le Kaskrout de la Cheffe", prix: 11.9 },
+    ],
+  },
+  {
+    categorie: "Boissons Froides",
+    produits: [
+      { nom: "Citronnade Maison", prix: 4.9 },
+      { nom: "Soda", prix: 2.9 },
+      { nom: "Eaux", prix: 2.9 },
+    ],
+  },
+  {
+    categorie: "Boissons Chaudes",
+    produits: [
+      { nom: "Thé", prix: 3.9 },
+      { nom: "Latte Kawa Arbi", prix: 4.9 },
+      { nom: "Kawa Arbi", prix: 4.9 },
+    ],
+  },
+  {
+    categorie: "Desserts",
+    produits: [
+      { nom: "Fricassé Chocolat", prix: 3.9 },
+      { nom: "Assortiment de Pâtisseries Tunisiennes x3", prix: 4.9 },
+      { nom: "Assortiment de Pâtisseries Tunisiennes x15", prix: 22.0 },
+    ],
+  },
+  {
+    categorie: "Formule du Midi",
+    produits: [
+      { nom: "Formule Fricassé", prix: 14.9 },
+      { nom: "Formule Kaskrout", prix: 15.9 },
+    ],
+  },
+]
 
-  const productCount = await prisma.product.count()
-  if (productCount === 0) {
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+async function main() {
+  // Delete existing products first (FK constraint)
+  await prisma.product.deleteMany()
+  await prisma.category.deleteMany()
+
+  for (let order = 0; order < MENU_DATA.length; order++) {
+    const { categorie, produits } = MENU_DATA[order]
+    const slug = slugify(categorie)
+
+    const category = await prisma.category.create({
+      data: {
+        name: categorie,
+        slug,
+        order,
+      },
+    })
+
     await prisma.product.createMany({
-      data: [
-        { name: 'Le Classique', description: 'Thon, œuf, olives, harissa, pommes de terre', price: 9.9, categoryId: kaskrout.id, isBestseller: true },
-        { name: 'Fric Morning', description: 'Petit fricassé du matin', price: 4.9, categoryId: fricasse.id },
-        { name: 'Citronnade Maison', description: 'Fraîche et maison', price: 4.9, categoryId: boissons.id },
-      ],
+      data: produits.map((p) => ({
+        name: p.nom,
+        price: p.prix,
+        categoryId: category.id,
+        description: null,
+      })),
     })
   }
 
-  console.log('Seed done: categories and sample products created.')
+  const categoryCount = await prisma.category.count()
+  const productCount = await prisma.product.count()
+  console.log(`Seed done: ${categoryCount} categories and ${productCount} products created.`)
 }
 
 main()

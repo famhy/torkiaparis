@@ -1,5 +1,24 @@
 const VITE_API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api'
 
+/** Base URL for API server (used for upload URLs) */
+const API_ORIGIN = VITE_API_BASE.replace(/\/api\/?$/, '') || 'http://localhost:3001'
+
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData()
+  form.append('image', file)
+  const res = await fetch(`${VITE_API_BASE}/upload`, {
+    method: 'POST',
+    body: form,
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error || 'Erreur upload image')
+  }
+  const data = await res.json()
+  const path = data.url as string
+  return path.startsWith('http') ? path : `${API_ORIGIN}${path}`
+}
+
 export interface AdminOrderItem {
   name?: string
   label?: string
