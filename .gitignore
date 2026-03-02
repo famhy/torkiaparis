@@ -133,6 +133,6 @@ thumb
 sketch
 
 # Backend uploaded images
-backend/uploads
+#backend/uploads
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node,react
