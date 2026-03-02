@@ -19,6 +19,7 @@ import {
   type OrderStatusId,
   updateProduct,
   UpdateProductBody,
+  deleteProduct,
 } from "../api/admin";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { useMenu } from "../context/MenuContext";
