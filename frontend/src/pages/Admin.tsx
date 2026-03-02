@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { fetchCategories, fetchProducts } from '../api/client'
-import type { ApiCategory } from '../api/client'
-import type { ApiProduct } from '../api/client'
+import { useState, useEffect, useCallback } from "react";
+import { fetchCategories, fetchProducts } from "../api/client";
+import type { ApiCategory } from "../api/client";
+import type { ApiProduct } from "../api/client";
 import {
   fetchOrders,
   createCategory,
@@ -17,69 +17,73 @@ import {
   type UpdateCategoryBody,
   type CreateProductBody,
   type OrderStatusId,
-} from '../api/admin'
-import { useAdminAuth } from '../context/AdminAuthContext'
-import { useMenu } from '../context/MenuContext'
+  updateProduct,
+  UpdateProductBody,
+} from "../api/admin";
+import { useAdminAuth } from "../context/AdminAuthContext";
+import { useMenu } from "../context/MenuContext";
 
-type Tab = 'orders' | 'categories' | 'products'
+type Tab = "orders" | "categories" | "products";
 
 export default function Admin() {
-  const { isAdmin, login, logout } = useAdminAuth()
-  const [password, setPassword] = useState('')
-  const [loginError, setLoginError] = useState('')
-  const [activeTab, setActiveTab] = useState<Tab>('orders')
+  const { isAdmin, login, logout } = useAdminAuth();
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("orders");
 
-  const [orders, setOrders] = useState<AdminOrder[]>([])
-  const [categories, setCategories] = useState<ApiCategory[]>([])
-  const [products, setProducts] = useState<ApiProduct[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const loadOrders = useCallback(() => {
     fetchOrders()
       .then(setOrders)
-      .catch(() => setOrders([]))
-  }, [])
+      .catch(() => setOrders([]));
+  }, []);
 
   const loadCategories = useCallback(() => {
     fetchCategories()
       .then((data) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => setCategories([]))
-  }, [])
+      .catch(() => setCategories([]));
+  }, []);
 
   const loadProducts = useCallback(() => {
     fetchProducts()
       .then((data) => setProducts(Array.isArray(data) ? data : []))
-      .catch(() => setProducts([]))
-  }, [])
+      .catch(() => setProducts([]));
+  }, []);
 
-  const { refetch: refetchMenu } = useMenu()
+  const { refetch: refetchMenu } = useMenu();
   const refreshCategoriesAndMenu = useCallback(() => {
-    loadCategories()
-    refetchMenu()
-  }, [loadCategories, refetchMenu])
+    loadCategories();
+    refetchMenu();
+  }, [loadCategories, refetchMenu]);
 
   useEffect(() => {
-    if (!isAdmin) return
-    setLoading(true)
-    setError(null)
+    if (!isAdmin) return;
+    setLoading(true);
+    setError(null);
     Promise.all([fetchOrders(), fetchCategories(), fetchProducts()])
       .then(([o, c, p]) => {
-        setOrders(Array.isArray(o) ? o : [])
-        setCategories(Array.isArray(c) ? c : [])
-        setProducts(Array.isArray(p) ? p : [])
+        setOrders(Array.isArray(o) ? o : []);
+        setCategories(Array.isArray(c) ? c : []);
+        setProducts(Array.isArray(p) ? p : []);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : 'Erreur chargement'))
-      .finally(() => setLoading(false))
-  }, [isAdmin])
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Erreur chargement"),
+      )
+      .finally(() => setLoading(false));
+  }, [isAdmin]);
 
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoginError('')
-    if (login(password)) return
-    setLoginError('Mot de passe incorrect')
-  }
+    e.preventDefault();
+    setLoginError("");
+    if (login(password)) return;
+    setLoginError("Mot de passe incorrect");
+  };
 
   if (!isAdmin) {
     return (
@@ -100,9 +104,7 @@ export default function Admin() {
               className="w-full rounded-[var(--radius-card)] border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               autoFocus
             />
-            {loginError && (
-              <p className="text-red-600 text-sm">{loginError}</p>
-            )}
+            {loginError && <p className="text-red-600 text-sm">{loginError}</p>}
             <button
               type="submit"
               className="w-full py-2.5 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary)]/90"
@@ -112,17 +114,17 @@ export default function Admin() {
           </form>
         </div>
       </div>
-    )
+    );
   }
 
   const navItems: { id: Tab; label: string }[] = [
-    { id: 'orders', label: 'Commandes' },
-    { id: 'categories', label: 'Catégories' },
-    { id: 'products', label: 'Produits' },
-  ]
+    { id: "orders", label: "Commandes" },
+    { id: "categories", label: "Catégories" },
+    { id: "products", label: "Produits" },
+  ];
 
-  const closeMobileSidebar = () => setMobileSidebarOpen(false)
-  const openMobileSidebar = () => setMobileSidebarOpen(true)
+  const closeMobileSidebar = () => setMobileSidebarOpen(false);
+  const openMobileSidebar = () => setMobileSidebarOpen(true);
 
   return (
     <div className="min-h-screen flex bg-[var(--color-bg)] min-w-0">
@@ -138,7 +140,7 @@ export default function Admin() {
       {/* Sidebar: drawer on mobile, static on md+ */}
       <aside
         className={`fixed md:relative inset-y-0 left-0 z-50 w-64 sm:w-56 md:w-56 shrink-0 flex flex-col border-r border-gray-200 bg-[var(--color-bg-card)] shadow-[var(--shadow-soft)] min-h-screen transition-transform duration-200 ease-out md:translate-x-0 ${
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
@@ -151,8 +153,18 @@ export default function Admin() {
             className="md:hidden p-2 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600 min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Fermer le menu"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -162,13 +174,13 @@ export default function Admin() {
               key={id}
               type="button"
               onClick={() => {
-                setActiveTab(id)
-                closeMobileSidebar()
+                setActiveTab(id);
+                closeMobileSidebar();
               }}
               className={`w-full text-left px-4 py-3 rounded-[var(--radius-card)] font-medium transition-colors min-h-[48px] flex items-center ${
                 activeTab === id
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               {label}
@@ -196,16 +208,28 @@ export default function Admin() {
             className="md:hidden mb-4 p-3 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium flex items-center gap-2 min-h-[44px]"
             aria-label="Ouvrir le menu"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
             Menu
           </button>
           {error && (
-            <p className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">{error}</p>
+            <p className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+              {error}
+            </p>
           )}
 
-          {activeTab === 'orders' && (
+          {activeTab === "orders" && (
             <OrdersTab
               orders={orders}
               loading={loading}
@@ -213,7 +237,7 @@ export default function Admin() {
             />
           )}
 
-          {activeTab === 'categories' && (
+          {activeTab === "categories" && (
             <CategoriesTab
               categories={categories}
               loading={loading}
@@ -221,7 +245,7 @@ export default function Admin() {
             />
           )}
 
-          {activeTab === 'products' && (
+          {activeTab === "products" && (
             <ProductsTab
               products={products}
               categories={categories}
@@ -232,15 +256,15 @@ export default function Admin() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 /** Normalize backend status to our board columns (pending -> nouvelle) */
 function orderStatusForBoard(status: string | undefined): OrderStatusId {
-  const s = (status ?? 'pending').toLowerCase()
-  if (s === 'en_preparation' || s === 'en preparation') return 'en_preparation'
-  if (s === 'pret' || s === 'ready') return 'pret'
-  return 'nouvelle'
+  const s = (status ?? "pending").toLowerCase();
+  if (s === "en_preparation" || s === "en preparation") return "en_preparation";
+  if (s === "pret" || s === "ready") return "pret";
+  return "nouvelle";
 }
 
 function OrdersTab({
@@ -248,30 +272,35 @@ function OrdersTab({
   loading,
   onRefresh,
 }: {
-  orders: AdminOrder[]
-  loading: boolean
-  onRefresh: () => void
+  orders: AdminOrder[];
+  loading: boolean;
+  onRefresh: () => void;
 }) {
-  const [updatingId, setUpdatingId] = useState<string | null>(null)
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
 
   const ordersByStatus = (statusId: OrderStatusId) =>
-    orders.filter((o) => orderStatusForBoard(o.status) === statusId)
+    orders.filter((o) => orderStatusForBoard(o.status) === statusId);
 
-  const handleStatusChange = async (orderId: string, newStatus: OrderStatusId) => {
-    setUpdatingId(orderId)
+  const handleStatusChange = async (
+    orderId: string,
+    newStatus: OrderStatusId,
+  ) => {
+    setUpdatingId(orderId);
     try {
-      await updateOrderStatus(orderId, newStatus)
-      onRefresh()
+      await updateOrderStatus(orderId, newStatus);
+      onRefresh();
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, status: newStatus } : null,
+        );
       }
     } catch {
       // keep current state on error
     } finally {
-      setUpdatingId(null)
+      setUpdatingId(null);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -300,7 +329,8 @@ function OrdersTab({
               <div className="p-3 border-b border-gray-200 bg-white/80 rounded-t-[var(--radius-card)]">
                 <h3 className="font-semibold text-gray-800">{label}</h3>
                 <span className="text-sm text-gray-500">
-                  {ordersByStatus(id).length} commande{ordersByStatus(id).length !== 1 ? 's' : ''}
+                  {ordersByStatus(id).length} commande
+                  {ordersByStatus(id).length !== 1 ? "s" : ""}
                 </span>
               </div>
               <div className="p-2 flex-1 overflow-y-auto space-y-2">
@@ -328,13 +358,15 @@ function OrdersTab({
         <OrderDetailModal
           order={selectedOrder}
           currentStatus={orderStatusForBoard(selectedOrder.status)}
-          onStatusChange={(status) => handleStatusChange(selectedOrder.id, status)}
+          onStatusChange={(status) =>
+            handleStatusChange(selectedOrder.id, status)
+          }
           onClose={() => setSelectedOrder(null)}
           updating={updatingId === selectedOrder.id}
         />
       )}
     </div>
-  )
+  );
 }
 
 function OrderCard({
@@ -344,11 +376,11 @@ function OrderCard({
   onViewDetails,
   updating,
 }: {
-  order: AdminOrder
-  currentStatus: OrderStatusId
-  onStatusChange: (orderId: string, status: OrderStatusId) => void
-  onViewDetails: () => void
-  updating: boolean
+  order: AdminOrder;
+  currentStatus: OrderStatusId;
+  onStatusChange: (orderId: string, status: OrderStatusId) => void;
+  onViewDetails: () => void;
+  updating: boolean;
 }) {
   return (
     <div className="rounded-lg bg-[var(--color-bg-card)] border border-gray-200 shadow-sm p-3 hover:shadow-[var(--shadow-soft)] transition-shadow">
@@ -362,7 +394,7 @@ function OrderCard({
           <p className="text-xs text-gray-500 mt-0.5">{order.telephone}</p>
         )}
         <p className="text-xs text-gray-500 mt-0.5">
-          {new Date(order.createdAt).toLocaleString('fr-FR')}
+          {new Date(order.createdAt).toLocaleString("fr-FR")}
         </p>
         <p className="text-sm font-semibold text-[var(--color-secondary)] mt-1">
           {Number(order.total).toFixed(2)}€
@@ -376,10 +408,14 @@ function OrderCard({
         >
           Voir le détail
         </button>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Changer le statut</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">
+          Changer le statut
+        </label>
         <select
           value={currentStatus}
-          onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatusId)}
+          onChange={(e) =>
+            onStatusChange(order.id, e.target.value as OrderStatusId)
+          }
           disabled={updating}
           className="w-full text-sm rounded border border-gray-300 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
         >
@@ -391,7 +427,7 @@ function OrderCard({
         </select>
       </div>
     </div>
-  )
+  );
 }
 
 function OrderDetailModal({
@@ -401,20 +437,31 @@ function OrderDetailModal({
   onClose,
   updating,
 }: {
-  order: AdminOrder
-  currentStatus: OrderStatusId
-  onStatusChange: (status: OrderStatusId) => void
-  onClose: () => void
-  updating: boolean
+  order: AdminOrder;
+  currentStatus: OrderStatusId;
+  onStatusChange: (status: OrderStatusId) => void;
+  onClose: () => void;
+  updating: boolean;
 }) {
-  const itemName = (it: AdminOrderItem) => it.name ?? it.label ?? it.item?.name ?? 'Article'
+  const itemName = (it: AdminOrderItem) =>
+    it.name ?? it.label ?? it.item?.name ?? "Article";
   const itemPrice = (it: AdminOrderItem) => {
-    const q = it.quantity || 1
-    const p = it.price ?? it.item?.price ?? 0
-    return q * Number(p)
-  }
-  const deliveryLabel = order.deliveryType === 'click_collect' ? 'Click & Collect' : order.deliveryType === 'livraison' ? 'Livraison' : order.deliveryType ?? '—'
-  const paymentLabel = order.paymentMethod === 'card' ? 'Carte bancaire' : order.paymentMethod === 'livraison' ? 'À la livraison' : order.paymentMethod ?? '—'
+    const q = it.quantity || 1;
+    const p = it.price ?? it.item?.price ?? 0;
+    return q * Number(p);
+  };
+  const deliveryLabel =
+    order.deliveryType === "click_collect"
+      ? "Click & Collect"
+      : order.deliveryType === "livraison"
+        ? "Livraison"
+        : (order.deliveryType ?? "—");
+  const paymentLabel =
+    order.paymentMethod === "card"
+      ? "Carte bancaire"
+      : order.paymentMethod === "livraison"
+        ? "À la livraison"
+        : (order.paymentMethod ?? "—");
 
   return (
     <>
@@ -434,7 +481,10 @@ function OrderDetailModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="sticky top-0 bg-[var(--color-bg-card)] border-b border-gray-100 p-4 flex items-center justify-between shrink-0">
-            <h2 id="order-detail-title" className="font-[var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
+            <h2
+              id="order-detail-title"
+              className="font-[var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]"
+            >
               Détail de la commande
             </h2>
             <button
@@ -443,26 +493,47 @@ function OrderDetailModal({
               className="p-2 rounded-[var(--radius-card)] hover:bg-gray-100 text-gray-600 min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Fermer"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
 
           <div className="p-4 space-y-4">
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Client</h3>
-              <p className="font-medium text-[var(--color-primary)]">{order.nom}</p>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Client
+              </h3>
+              <p className="font-medium text-[var(--color-primary)]">
+                {order.nom}
+              </p>
               {order.telephone && (
                 <p className="text-sm text-gray-600 mt-0.5">
-                  <a href={`tel:${order.telephone}`} className="text-[var(--color-primary)] hover:underline">{order.telephone}</a>
+                  <a
+                    href={`tel:${order.telephone}`}
+                    className="text-[var(--color-primary)] hover:underline"
+                  >
+                    {order.telephone}
+                  </a>
                 </p>
               )}
             </div>
 
             {(order.adresse || order.codePostal) && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Adresse</h3>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Adresse
+                </h3>
                 <p className="text-gray-700">
                   {order.adresse}
                   {order.codePostal && <br />}
@@ -473,28 +544,41 @@ function OrderDetailModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Retrait</h3>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Retrait
+                </h3>
                 <p className="text-gray-700">{deliveryLabel}</p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Paiement</h3>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Paiement
+                </h3>
                 <p className="text-gray-700">{paymentLabel}</p>
               </div>
             </div>
 
             {order.instructions && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Instructions</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{order.instructions}</p>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Instructions
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {order.instructions}
+                </p>
               </div>
             )}
 
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Articles</h3>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Articles
+              </h3>
               <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden">
                 {order.items && order.items.length > 0 ? (
                   order.items.map((item, i) => (
-                    <li key={i} className="flex justify-between items-center px-3 py-2 bg-gray-50/50">
+                    <li
+                      key={i}
+                      className="flex justify-between items-center px-3 py-2 bg-gray-50/50"
+                    >
                       <span className="text-gray-800">
                         {itemName(item)} × {item.quantity}
                       </span>
@@ -504,7 +588,9 @@ function OrderDetailModal({
                     </li>
                   ))
                 ) : (
-                  <li className="px-3 py-2 text-gray-500 text-sm">Aucun détail</li>
+                  <li className="px-3 py-2 text-gray-500 text-sm">
+                    Aucun détail
+                  </li>
                 )}
               </ul>
             </div>
@@ -522,12 +608,14 @@ function OrderDetailModal({
                   <span>{Number(order.deliveryFee).toFixed(2)}€</span>
                 </div>
               )}
-              {order.promoCode && order.promoDiscount != null && Number(order.promoDiscount) > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>Réduction ({order.promoCode})</span>
-                  <span>−{Number(order.promoDiscount).toFixed(2)}€</span>
-                </div>
-              )}
+              {order.promoCode &&
+                order.promoDiscount != null &&
+                Number(order.promoDiscount) > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Réduction ({order.promoCode})</span>
+                    <span>−{Number(order.promoDiscount).toFixed(2)}€</span>
+                  </div>
+                )}
               <div className="flex justify-between font-semibold text-[var(--color-primary)] pt-2">
                 <span>Total</span>
                 <span>{Number(order.total).toFixed(2)}€</span>
@@ -535,10 +623,14 @@ function OrderDetailModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Statut
+              </label>
               <select
                 value={currentStatus}
-                onChange={(e) => onStatusChange(e.target.value as OrderStatusId)}
+                onChange={(e) =>
+                  onStatusChange(e.target.value as OrderStatusId)
+                }
                 disabled={updating}
                 className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50"
               >
@@ -553,7 +645,7 @@ function OrderDetailModal({
         </div>
       </div>
     </>
-  )
+  );
 }
 
 function CategoriesTab({
@@ -561,101 +653,110 @@ function CategoriesTab({
   loading,
   onRefresh,
 }: {
-  categories: ApiCategory[]
-  loading: boolean
-  onRefresh: () => void
+  categories: ApiCategory[];
+  loading: boolean;
+  onRefresh: () => void;
 }) {
-  const [name, setName] = useState('')
-  const [slug, setSlug] = useState('')
-  const [order, setOrder] = useState(0)
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
-  const [editing, setEditing] = useState<ApiCategory | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editSlug, setEditSlug] = useState('')
-  const [editOrder, setEditOrder] = useState(0)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [order, setOrder] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "ok" | "err";
+    text: string;
+  } | null>(null);
+  const [editing, setEditing] = useState<ApiCategory | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editSlug, setEditSlug] = useState("");
+  const [editOrder, setEditOrder] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     const body: CreateCategoryBody = {
       name: name.trim(),
-      slug: slug.trim() || name.trim().toLowerCase().replace(/\s+/g, '-'),
+      slug: slug.trim() || name.trim().toLowerCase().replace(/\s+/g, "-"),
       order,
-    }
-    setSubmitting(true)
-    setMessage(null)
+    };
+    setSubmitting(true);
+    setMessage(null);
     try {
-      await createCategory(body)
-      setMessage({ type: 'ok', text: 'Catégorie ajoutée.' })
-      setName('')
-      setSlug('')
-      setOrder(categories.length)
-      onRefresh()
+      await createCategory(body);
+      setMessage({ type: "ok", text: "Catégorie ajoutée." });
+      setName("");
+      setSlug("");
+      setOrder(categories.length);
+      onRefresh();
     } catch (err) {
       setMessage({
-        type: 'err',
-        text: err instanceof Error ? err.message : 'Erreur',
-      })
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const startEdit = (c: ApiCategory) => {
-    setEditing(c)
-    setEditName(c.name)
-    setEditSlug(c.slug)
-    setEditOrder(c.order)
-    setMessage(null)
-  }
+    setEditing(c);
+    setEditName(c.name);
+    setEditSlug(c.slug);
+    setEditOrder(c.order);
+    setMessage(null);
+  };
 
   const cancelEdit = () => {
-    setEditing(null)
-  }
+    setEditing(null);
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editing) return
-    setSubmitting(true)
-    setMessage(null)
+    e.preventDefault();
+    if (!editing) return;
+    setSubmitting(true);
+    setMessage(null);
     try {
       const body: UpdateCategoryBody = {
         name: editName.trim(),
-        slug: editSlug.trim() || editName.trim().toLowerCase().replace(/\s+/g, '-'),
+        slug:
+          editSlug.trim() || editName.trim().toLowerCase().replace(/\s+/g, "-"),
         order: editOrder,
-      }
-      await updateCategory(editing.id, body)
-      setMessage({ type: 'ok', text: 'Catégorie mise à jour.' })
-      setEditing(null)
-      onRefresh()
+      };
+      await updateCategory(editing.id, body);
+      setMessage({ type: "ok", text: "Catégorie mise à jour." });
+      setEditing(null);
+      onRefresh();
     } catch (err) {
       setMessage({
-        type: 'err',
-        text: err instanceof Error ? err.message : 'Erreur',
-      })
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleDelete = async (c: ApiCategory) => {
-    if (!window.confirm(`Supprimer la catégorie « ${c.name } » ? Les produits de cette catégorie seront aussi supprimés.`)) return
-    setDeletingId(c.id)
-    setMessage(null)
+    if (
+      !window.confirm(
+        `Supprimer la catégorie « ${c.name} » ? Les produits de cette catégorie seront aussi supprimés.`,
+      )
+    )
+      return;
+    setDeletingId(c.id);
+    setMessage(null);
     try {
-      await deleteCategory(c.id)
-      setMessage({ type: 'ok', text: 'Catégorie supprimée.' })
-      onRefresh()
+      await deleteCategory(c.id);
+      setMessage({ type: "ok", text: "Catégorie supprimée." });
+      onRefresh();
     } catch (err) {
       setMessage({
-        type: 'err',
-        text: err instanceof Error ? err.message : 'Erreur',
-      })
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
     } finally {
-      setDeletingId(null)
+      setDeletingId(null);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -665,13 +766,16 @@ function CategoriesTab({
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nom
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value)
-                if (!slug) setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))
+                setName(e.target.value);
+                if (!slug)
+                  setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"));
               }}
               required
               className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -679,7 +783,9 @@ function CategoriesTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Slug (URL)
+            </label>
             <input
               type="text"
               value={slug}
@@ -689,7 +795,9 @@ function CategoriesTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ordre</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ordre
+            </label>
             <input
               type="number"
               value={order}
@@ -699,7 +807,13 @@ function CategoriesTab({
             />
           </div>
           {message && !editing && (
-            <p className={message.type === 'ok' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+            <p
+              className={
+                message.type === "ok"
+                  ? "text-green-600 text-sm"
+                  : "text-red-600 text-sm"
+              }
+            >
               {message.text}
             </p>
           )}
@@ -708,7 +822,7 @@ function CategoriesTab({
             disabled={submitting}
             className="px-4 py-2 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary)]/90 disabled:opacity-50"
           >
-            {submitting ? 'Envoi...' : 'Ajouter la catégorie'}
+            {submitting ? "Envoi..." : "Ajouter la catégorie"}
           </button>
         </form>
       </div>
@@ -718,7 +832,9 @@ function CategoriesTab({
           Catégories existantes (synchro avec le menu)
         </h2>
         {message && editing && (
-          <p className={`px-4 py-2 text-sm border-b border-gray-100 ${message.type === 'ok' ? 'text-green-600' : 'text-red-600'}`}>
+          <p
+            className={`px-4 py-2 text-sm border-b border-gray-100 ${message.type === "ok" ? "text-green-600" : "text-red-600"}`}
+          >
             {message.text}
           </p>
         )}
@@ -732,20 +848,34 @@ function CategoriesTab({
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="px-4 py-3 font-semibold text-gray-700">Nom</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Slug</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Ordre</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700 text-right">Actions</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Slug
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Ordre
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 text-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {categories.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                  <tr
+                    key={c.id}
+                    className="border-b border-gray-100 hover:bg-gray-50/50"
+                  >
                     {editing?.id === c.id ? (
                       <>
                         <td colSpan={4} className="p-4">
-                          <form onSubmit={handleUpdate} className="flex flex-wrap items-end gap-3">
+                          <form
+                            onSubmit={handleUpdate}
+                            className="flex flex-wrap items-end gap-3"
+                          >
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Nom</label>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Nom
+                              </label>
                               <input
                                 type="text"
                                 value={editName}
@@ -755,7 +885,9 @@ function CategoriesTab({
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Slug</label>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Slug
+                              </label>
                               <input
                                 type="text"
                                 value={editSlug}
@@ -764,11 +896,17 @@ function CategoriesTab({
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-0.5">Ordre</label>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Ordre
+                              </label>
                               <input
                                 type="number"
                                 value={editOrder}
-                                onChange={(e) => setEditOrder(parseInt(e.target.value, 10) || 0)}
+                                onChange={(e) =>
+                                  setEditOrder(
+                                    parseInt(e.target.value, 10) || 0,
+                                  )
+                                }
                                 min={0}
                                 className="w-16 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                               />
@@ -809,7 +947,9 @@ function CategoriesTab({
                             disabled={deletingId === c.id}
                             className="px-2 py-1 rounded border border-red-200 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
                           >
-                            {deletingId === c.id ? 'Suppression...' : 'Supprimer'}
+                            {deletingId === c.id
+                              ? "Suppression..."
+                              : "Supprimer"}
                           </button>
                         </td>
                       </>
@@ -822,7 +962,7 @@ function CategoriesTab({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function ProductsTab({
@@ -831,39 +971,52 @@ function ProductsTab({
   loading,
   onRefresh,
 }: {
-  products: ApiProduct[]
-  categories: ApiCategory[]
-  loading: boolean
-  onRefresh: () => void
+  products: ApiProduct[];
+  categories: ApiCategory[];
+  loading: boolean;
+  onRefresh: () => void;
 }) {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [categoryId, setCategoryId] = useState('')
-  const [isBestseller, setIsBestseller] = useState(false)
-  const [isAvailable, setIsAvailable] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [categoryId, setCategoryId] = useState("");
+  const [isBestseller, setIsBestseller] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "ok" | "err";
+    text: string;
+  } | null>(null);
+  const [editing, setEditing] = useState<ApiProduct | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editIsBestseller, setEditIsBestseller] = useState(false);
+  const [editIsAvailable, setEditIsAvailable] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (categories.length && !categoryId) setCategoryId(categories[0].id)
-  }, [categories, categoryId])
+    if (categories.length && !categoryId) setCategoryId(categories[0].id);
+  }, [categories, categoryId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const numPrice = parseFloat(price.replace(',', '.'))
+    e.preventDefault();
+    const numPrice = parseFloat(price.replace(",", "."));
     if (Number.isNaN(numPrice) || numPrice < 0) {
-      setMessage({ type: 'err', text: 'Prix invalide' })
-      return
+      setMessage({ type: "err", text: "Prix invalide" });
+      return;
     }
-    setSubmitting(true)
-    setMessage(null)
+    setSubmitting(true);
+    setMessage(null);
     try {
-      let finalImageUrl = imageUrl.trim() || undefined
+      let finalImageUrl = imageUrl.trim() || undefined;
       if (imageFile) {
-        finalImageUrl = await uploadImage(imageFile)
+        finalImageUrl = await uploadImage(imageFile);
       }
       const body: CreateProductBody = {
         name: name.trim(),
@@ -873,26 +1026,103 @@ function ProductsTab({
         categoryId: categoryId || categories[0]?.id,
         isBestseller,
         isAvailable,
-      }
-      await createProduct(body)
-      setMessage({ type: 'ok', text: 'Produit ajouté.' })
-      setName('')
-      setDescription('')
-      setPrice('')
-      setImageUrl('')
-      setImageFile(null)
-      setIsBestseller(false)
-      setIsAvailable(true)
-      onRefresh()
+      };
+      await createProduct(body);
+      setMessage({ type: "ok", text: "Produit ajouté." });
+      setName("");
+      setDescription("");
+      setPrice("");
+      setImageUrl("");
+      setImageFile(null);
+      setIsBestseller(false);
+      setIsAvailable(true);
+      onRefresh();
     } catch (err) {
       setMessage({
-        type: 'err',
-        text: err instanceof Error ? err.message : 'Erreur',
-      })
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
+
+  const startEdit = (p: ApiProduct) => {
+    setEditing(p);
+    setEditName(p.name);
+    setEditDescription(p.description ?? "");
+    const priceValue =
+      typeof p.price === "string" ? p.price : Number(p.price).toFixed(2);
+    setEditPrice(priceValue);
+    setEditImageUrl(p.imageUrl ?? "");
+    setEditCategoryId(p.categoryId);
+    setEditIsBestseller(Boolean(p.isBestseller));
+    setEditIsAvailable(Boolean(p.isAvailable));
+    setEditImageFile(null);
+    setMessage(null);
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setEditImageFile(null);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    const numPrice = parseFloat(editPrice.replace(",", "."));
+    if (Number.isNaN(numPrice) || numPrice < 0) {
+      setMessage({ type: "err", text: "Prix invalide" });
+      return;
+    }
+    setSubmitting(true);
+    setMessage(null);
+    try {
+      let finalImageUrl = editImageUrl.trim() || editing.imageUrl || undefined;
+      if (editImageFile) {
+        finalImageUrl = await uploadImage(editImageFile);
+      }
+      const body: UpdateProductBody = {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+        price: numPrice,
+        imageUrl: finalImageUrl,
+        categoryId: editCategoryId || categories[0]?.id,
+        isBestseller: editIsBestseller,
+        isAvailable: editIsAvailable,
+      };
+      await updateProduct(editing.id, body);
+      setMessage({ type: "ok", text: "Produit mis à jour." });
+      setEditing(null);
+      setEditImageFile(null);
+      onRefresh();
+    } catch (err) {
+      setMessage({
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (p: ApiProduct) => {
+    if (!window.confirm(`Supprimer le produit « ${p.name} » ?`)) return;
+    setDeletingId(p.id);
+    setMessage(null);
+    try {
+      await deleteProduct(p.id);
+      setMessage({ type: "ok", text: "Produit supprimé." });
+      onRefresh();
+    } catch (err) {
+      setMessage({
+        type: "err",
+        text: err instanceof Error ? err.message : "Erreur",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -902,7 +1132,9 @@ function ProductsTab({
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nom
+            </label>
             <input
               type="text"
               value={name}
@@ -913,7 +1145,9 @@ function ProductsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -923,7 +1157,9 @@ function ProductsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Prix (€)
+            </label>
             <input
               type="text"
               inputMode="decimal"
@@ -935,21 +1171,25 @@ function ProductsTab({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image — affichée sur le menu</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Image — affichée sur le menu
+            </label>
             <div className="flex flex-wrap gap-4 items-start">
               <div>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/gif,image/webp"
                   onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    setImageFile(f || null)
-                    if (!f) return
-                    setImageUrl('')
+                    const f = e.target.files?.[0];
+                    setImageFile(f || null);
+                    if (!f) return;
+                    setImageUrl("");
                   }}
                   className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-[var(--radius-card)] file:border-0 file:text-sm file:font-medium file:bg-[var(--color-primary)] file:text-white file:cursor-pointer hover:file:bg-[var(--color-primary)]/90"
                 />
-                <p className="mt-1 text-xs text-gray-500">JPEG, PNG, GIF ou WebP — max 5 Mo</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  JPEG, PNG, GIF ou WebP — max 5 Mo
+                </p>
               </div>
               <span className="text-gray-400 text-sm">ou</span>
               <div className="flex-1 min-w-[200px]">
@@ -957,8 +1197,8 @@ function ProductsTab({
                   type="url"
                   value={imageUrl}
                   onChange={(e) => {
-                    setImageUrl(e.target.value)
-                    setImageFile(null)
+                    setImageUrl(e.target.value);
+                    setImageFile(null);
                   }}
                   className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="URL (ex: https://exemple.com/image.jpg)"
@@ -979,7 +1219,7 @@ function ProductsTab({
                     alt="Aperçu"
                     className="w-full h-full object-cover"
                     onError={({ currentTarget }) => {
-                      currentTarget.style.display = 'none'
+                      currentTarget.style.display = "none";
                     }}
                   />
                 )}
@@ -987,14 +1227,18 @@ function ProductsTab({
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Catégorie
+            </label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               className="w-full rounded-[var(--radius-card)] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             >
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
             </select>
           </div>
@@ -1017,7 +1261,13 @@ function ProductsTab({
             </label>
           </div>
           {message && (
-            <p className={message.type === 'ok' ? 'text-green-600 text-sm' : 'text-red-600 text-sm'}>
+            <p
+              className={
+                message.type === "ok"
+                  ? "text-green-600 text-sm"
+                  : "text-red-600 text-sm"
+              }
+            >
               {message.text}
             </p>
           )}
@@ -1026,7 +1276,7 @@ function ProductsTab({
             disabled={submitting}
             className="px-4 py-2 rounded-[var(--radius-card)] bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary)]/90 disabled:opacity-50"
           >
-            {submitting ? 'Envoi...' : 'Ajouter le produit'}
+            {submitting ? "Envoi..." : "Ajouter le produit"}
           </button>
         </form>
       </div>
@@ -1044,47 +1294,275 @@ function ProductsTab({
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-4 py-3 font-semibold text-gray-700 w-20">Image</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 w-20">
+                    Image
+                  </th>
                   <th className="px-4 py-3 font-semibold text-gray-700">Nom</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700 max-w-[200px]">Description</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Catégorie</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Prix</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Best-seller</th>
-                  <th className="px-4 py-3 font-semibold text-gray-700">Disponible</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 max-w-[200px]">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Catégorie
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Prix
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Best-seller
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">
+                    Disponible
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-700 text-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((p) => {
-                  const imgUrl = p.imageUrl?.trim() || null
+                  const imgUrl = p.imageUrl?.trim() || null;
                   return (
-                  <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50/50">
-                    <td className="px-4 py-2">
-                      <div className="w-14 h-14 rounded-lg border border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
-                        {imgUrl ? (
-                          <img
-                            src={imgUrl}
-                            alt={p.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-medium">{p.name}</td>
-                    <td className="px-4 py-3 text-gray-600 text-sm max-w-[200px] truncate" title={p.description ?? ''}>
-                      {p.description ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{p.category?.name ?? p.categoryId}</td>
-                    <td className="px-4 py-3 text-[var(--color-secondary)] font-medium">
-                      {typeof p.price === 'string' ? p.price : Number(p.price).toFixed(2)}€
-                    </td>
-                    <td className="px-4 py-3">{p.isBestseller ? 'Oui' : '—'}</td>
-                    <td className="px-4 py-3">{p.isAvailable ? 'Oui' : 'Non'}</td>
-                  </tr>
-                  )
+                    <tr
+                      key={p.id}
+                      className="border-b border-gray-100 hover:bg-gray-50/50"
+                    >
+                      {editing?.id === p.id ? (
+                        <td colSpan={8} className="px-4 py-3">
+                          <form
+                            onSubmit={handleUpdate}
+                            className="flex flex-wrap items-end gap-3"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div>
+                                <div className="w-14 h-14 rounded-lg border border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center shrink-0 mb-2">
+                                  {editImageFile ? (
+                                    <img
+                                      src={URL.createObjectURL(editImageFile)}
+                                      alt={editName}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : editImageUrl.trim() ? (
+                                    <img
+                                      src={editImageUrl.trim()}
+                                      alt={editName}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : imgUrl ? (
+                                    <img
+                                      src={imgUrl}
+                                      alt={p.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <svg
+                                      className="w-6 h-6 text-gray-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      aria-hidden
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.5}
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/gif,image/webp"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    setEditImageFile(f || null);
+                                    if (f) setEditImageUrl("");
+                                  }}
+                                  className="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-2 file:rounded-[var(--radius-card)] file:border-0 file:text-xs file:font-medium file:bg-[var(--color-primary)] file:text-white file:cursor-pointer hover:file:bg-[var(--color-primary)]/90"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Nom
+                              </label>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                required
+                                className="w-40 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Description
+                              </label>
+                              <input
+                                type="text"
+                                value={editDescription}
+                                onChange={(e) =>
+                                  setEditDescription(e.target.value)
+                                }
+                                className="w-52 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Catégorie
+                              </label>
+                              <select
+                                value={editCategoryId}
+                                onChange={(e) =>
+                                  setEditCategoryId(e.target.value)
+                                }
+                                className="w-32 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              >
+                                {categories.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Prix (€)
+                              </label>
+                              <input
+                                type="text"
+                                value={editPrice}
+                                onChange={(e) => setEditPrice(e.target.value)}
+                                className="w-24 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-0.5">
+                                Image (URL)
+                              </label>
+                              <input
+                                type="url"
+                                value={editImageUrl}
+                                onChange={(e) => {
+                                  setEditImageUrl(e.target.value);
+                                  setEditImageFile(null);
+                                }}
+                                className="w-52 rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                              />
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <label className="flex items-center gap-1 text-xs cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editIsBestseller}
+                                  onChange={(e) =>
+                                    setEditIsBestseller(e.target.checked)
+                                  }
+                                />
+                                <span>Best-seller</span>
+                              </label>
+                              <label className="flex items-center gap-1 text-xs cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editIsAvailable}
+                                  onChange={(e) =>
+                                    setEditIsAvailable(e.target.checked)
+                                  }
+                                />
+                                <span>Disponible</span>
+                              </label>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                type="submit"
+                                disabled={submitting}
+                                className="px-3 py-1.5 rounded bg-[var(--color-primary)] text-white text-sm font-medium disabled:opacity-50"
+                              >
+                                Enregistrer
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEdit}
+                                className="px-3 py-1.5 rounded border border-gray-300 text-gray-700 text-sm"
+                              >
+                                Annuler
+                              </button>
+                            </div>
+                          </form>
+                        </td>
+                      ) : (
+                        <>
+                          <td className="px-4 py-2">
+                            <div className="w-14 h-14 rounded-lg border border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
+                              {imgUrl ? (
+                                <img
+                                  src={imgUrl}
+                                  alt={p.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <svg
+                                  className="w-6 h-6 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  aria-hidden
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-medium">{p.name}</td>
+                          <td
+                            className="px-4 py-3 text-gray-600 text-sm max-w-[200px] truncate"
+                            title={p.description ?? ""}
+                          >
+                            {p.description ?? "—"}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {p.category?.name ?? p.categoryId}
+                          </td>
+                          <td className="px-4 py-3 text-[var(--color-secondary)] font-medium">
+                            {typeof p.price === "string"
+                              ? p.price
+                              : Number(p.price).toFixed(2)}
+                            €
+                          </td>
+                          <td className="px-4 py-3">
+                            {p.isBestseller ? "Oui" : "—"}
+                          </td>
+                          <td className="px-4 py-3">
+                            {p.isAvailable ? "Oui" : "Non"}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(p)}
+                              className="px-2 py-1 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 mr-1"
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(p)}
+                              disabled={deletingId === p.id}
+                              className="px-2 py-1 rounded border border-red-200 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            >
+                              {deletingId === p.id
+                                ? "Suppression..."
+                                : "Supprimer"}
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
                 })}
               </tbody>
             </table>
@@ -1092,5 +1570,5 @@ function ProductsTab({
         )}
       </div>
     </div>
-  )
+  );
 }

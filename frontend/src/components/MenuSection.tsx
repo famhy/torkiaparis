@@ -1,17 +1,25 @@
-import { useState } from 'react'
-import { useMenu } from '../context/MenuContext'
-import ProductCard from './ProductCard'
-import type { CategoryId } from '../types'
+import { useEffect, useState } from "react";
+import { useMenu } from "../context/MenuContext";
+import ProductCard from "./ProductCard";
+import type { CategoryId } from "../types";
 
 export default function MenuSection() {
-  const { categories, menuItems, formuleMidiItem, loading, error } = useMenu()
-  const [activeCategory, setActiveCategory] = useState<CategoryId>(categories[0]?.id ?? 'kaskrout')
+  const { categories, menuItems, formuleMidiItem, loading, error } = useMenu();
+  const [activeCategory, setActiveCategory] = useState<CategoryId>(
+    categories[0]?.id ?? "kaskrout",
+  );
 
-  const filteredItems = menuItems.filter((i) => i.category === activeCategory)
-
+  const filteredItems = menuItems.filter((i) => i.category === activeCategory);
+  useEffect(() => {
+    console.log("activeCategory", activeCategory);
+    setActiveCategory(categories[0]?.id);
+  }, [categories]);
   if (loading) {
     return (
-      <section id="menu" className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20">
+      <section
+        id="menu"
+        className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20"
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="font-[var(--font-heading)] text-3xl sm:text-4xl font-semibold text-[var(--color-primary)] mb-4">
             Notre menu
@@ -19,31 +27,40 @@ export default function MenuSection() {
           <p className="text-gray-500">Chargement du menu...</p>
         </div>
       </section>
-    )
+    );
   }
 
   if (error) {
     return (
-      <section id="menu" className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20">
+      <section
+        id="menu"
+        className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20"
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="font-[var(--font-heading)] text-3xl sm:text-4xl font-semibold text-[var(--color-primary)] mb-4">
             Notre menu
           </h2>
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">Vérifiez que le serveur est démarré (port 3001).</p>
+          <p className="text-sm text-gray-500">
+            Vérifiez que le serveur est démarré (port 3001).
+          </p>
         </div>
       </section>
-    )
+    );
   }
 
   return (
-    <section id="menu" className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20">
+    <section
+      id="menu"
+      className="py-16 sm:py-20 bg-[var(--color-bg)] scroll-mt-20"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <h2 className="font-[var(--font-heading)] text-3xl sm:text-4xl font-semibold text-[var(--color-primary)] text-center mb-4">
           Notre menu
         </h2>
         <p className="text-center text-gray-600 mb-10 max-w-xl mx-auto">
-          Des recettes authentiques préparées avec des ingrédients frais et notre pain maison.
+          Des recettes authentiques préparées avec des ingrédients frais et
+          notre pain maison.
         </p>
 
         {formuleMidiItem && (
@@ -65,8 +82,8 @@ export default function MenuSection() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`shrink-0 snap-start px-4 py-3 sm:px-5 sm:py-2.5 rounded-[var(--radius-card)] font-medium transition-all min-h-[44px] ${
                     activeCategory === cat.id
-                      ? 'bg-[var(--color-primary)] text-white shadow-[var(--shadow-soft)]'
-                      : 'bg-[var(--color-bg-card)] text-[var(--color-primary)] border border-[var(--color-primary)]/20 hover:border-[var(--color-secondary)] hover:text-[var(--color-secondary)]'
+                      ? "bg-[var(--color-primary)] text-white shadow-[var(--shadow-soft)]"
+                      : "bg-[var(--color-bg-card)] text-[var(--color-primary)] border border-[var(--color-primary)]/20 hover:border-[var(--color-secondary)] hover:text-[var(--color-secondary)]"
                   }`}
                 >
                   {cat.label}
@@ -83,9 +100,11 @@ export default function MenuSection() {
         )}
 
         {categories.length === 0 && menuItems.length === 0 && (
-          <p className="text-center text-gray-500 py-12">Aucun produit pour le moment.</p>
+          <p className="text-center text-gray-500 py-12">
+            Aucun produit pour le moment.
+          </p>
         )}
       </div>
     </section>
-  )
+  );
 }
