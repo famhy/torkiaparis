@@ -1,12 +1,12 @@
-import { Routes, Route } from 'react-router-dom'
-import { CartProvider } from './context/CartContext'
-import { MenuProvider } from './context/MenuContext'
-import { AdminAuthProvider } from './context/AdminAuthContext'
-import Layout from './components/Layout'
-import Home from './pages/Home'
-import Checkout from './pages/Checkout'
-import OrderConfirmation from './pages/OrderConfirmation'
-import Admin from './pages/Admin'
+import { Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import { MenuProvider } from "./context/MenuContext";
+import { AdminAuthProvider } from "./context/AdminAuthContext";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
         </AdminAuthProvider>
       </CartProvider>
     </MenuProvider>
-  )
+  );
 }
 
-export default App
+export default App;
